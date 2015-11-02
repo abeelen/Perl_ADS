@@ -1,0 +1,75 @@
+diff -r -u -N Astro-ADS-1.20.7/Query/Query.pm Astro-ADS-1.20.7.new/Query/Query.pm
+--- Astro-ADS-1.20.7/Query/Query.pm	2002-09-23 23:07:49.000000000 +0200
++++ Astro-ADS-1.20.7.new/Query/Query.pm	2006-06-07 15:53:17.000000000 +0200
+@@ -586,6 +586,51 @@
+ 
+ }
+ 
++=item B<journalvolumepage>
++
++Return (or set) the Journal/Volume/Page information
++
++   @jvp = $query->journalvolumepage();
++   $query->journalvolumepage( \@jvp );
++
++=cut
++
++sub journalvolumepage {
++
++  my $self = shift;
++
++  # SETTING AUTHORS
++  if (@_) {
++
++    # clear the current object list
++    ${$self->{OPTIONS}}{"bibstem"} = "";
++    ${$self->{OPTIONS}}{"volume"} = "";
++    ${$self->{OPTIONS}}{"page"} = "";
++
++    # grab the new list from the arguements
++    my $object_ref = shift;
++
++    # make a local copy to use for regular expressions
++    my @object_list = @$object_ref;
++
++    # Change the & sign in the journal argument 
++    $object_list[0] =~ s/\&/\%26/g;
++
++    ${$self->{OPTIONS}}{"bibstem"} = $object_list[0];
++    ${$self->{OPTIONS}}{"volume"}  = $object_list[1];
++    ${$self->{OPTIONS}}{"page"}    = $object_list[2];
++
++ }
++
++  # RETURNING OBJECTS 
++  my @objects = [ ${$self->{OPTIONS}}{"bibstem"},
++		  ${$self->{OPTIONS}}{"volume"},
++		  ${$self->{OPTIONS}}{"page"}];
++  return @objects;
++
++}
++
++
+ # C O N F I G U R E -------------------------------------------------------
+ 
+ =back
+@@ -671,6 +716,10 @@
+   ${$self->{OPTIONS}}{"txt_sco"}          = "YES";
+   ${$self->{OPTIONS}}{"version"}          = "1";
+   ${$self->{OPTIONS}}{"bibcode"}          = "";
++  ${$self->{OPTIONS}}{"bibstem"}          = "";
++  ${$self->{OPTIONS}}{"volume"}           = "";
++  ${$self->{OPTIONS}}{"page"}             = "";
++
+ 
+   # Set the data_type option to PORTABLE so our regular expressions work!
+   # Set the return format to LONG so we get full abstracts!
+@@ -689,7 +738,7 @@
+   # Loop over the allowed keys and modify the default query options
+   for my $key (qw / Authors AuthorLogic Objects ObjectLogic Bibcode 
+                     StartMonth EndMonth StartYear EndYear Journal
+-                    Proxy Timeout URL/ ) {
++                    Proxy Timeout URL JournalVolumePage/ ) {
+       my $method = lc($key);
+       $self->$method( $args{$key} ) if exists $args{$key};
+   }
